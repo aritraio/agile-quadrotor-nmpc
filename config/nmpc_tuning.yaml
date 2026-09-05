@@ -1,0 +1,33 @@
+# NMPC tuning (receding horizon OCP).
+nmpc:
+  horizon: 20
+  dt: 0.05                # [s] -> T = 1.0 s
+  rate_hz: 100            # target control rate; deadline 10 ms
+  Q_pos: 20.0
+  Q_vel: 5.0
+  Q_att: 8.0
+  Q_omega: 0.5
+  R_thrust: 0.05
+  R_torque: 0.05
+  P_scale: 5.0            # terminal = P_scale * Q
+  tilt_max_deg: 34.4
+  tilt_weight: 500.0
+  obs_weight: 2000.0
+  max_iters: 5
+  grad_tol: 1.0e-4
+  init_step: 0.5
+  u_min: [0.0, -2.0, -2.0, -2.0]
+  u_max: [25.0, 2.0, 2.0, 2.0]
+
+# Static ellipsoidal obstacles (center + radii).
+obstacles:
+  - center: [3.0, 0.0, 1.5]
+    radii: [0.8, 0.8, 1.2]
+
+# Trajectory under test.
+trajectory:
+  type: lemniscate       # hover | lemniscate | step | circle
+  amplitude: 2.0
+  omega: 0.8
+  height: 1.5
+  z_amplitude: 0.3

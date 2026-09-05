@@ -1,0 +1,62 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        build_type: [Release]
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies (Ubuntu)
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential libeigen3-dev libgtest-dev libyaml-cpp-dev
+
+      - name: Install Dependencies (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          brew update
+          brew install cmake eigen googletest yaml-cpp
+
+      - name: Generate CasADi C99 OCP Sources
+        run: |
+          python3 scripts/export_ocp_casadi.py --outdir generated
+
+      - name: Configure CMake (Native + CasADi Backend)
+        run: |
+          cmake -B build -S . \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} \
+            -DUSE_ACADOS=ON \
+            -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+      - name: Compile Codebase
+        run: |
+          cmake --build build --config ${{ matrix.build_type }} --parallel
+
+      - name: Run Test Suite (CTest)
+        run: |
+          ctest --test-dir build --output-on-failure --timeout 120
+
+      - name: Run Closed-Loop Flight Simulation
+        run: |
+          ./build/main_node lemniscate 3.0 logs/flight_ci.csv
+          ./build/mujoco_visual_node lemniscate 3.0 logs/visual_ci.csv

@@ -1,0 +1,30 @@
+# Quadrotor physical parameters (SI units).
+mass: 1.0
+inertia: [0.0123, 0.0123, 0.022]   # diag(J) [kg m^2]
+drag: [0.10, 0.10, 0.15]           # diag(D) [N s / m]
+gravity: [0.0, 0.0, -9.81]
+max_thrust: 25.0                   # collective [N]
+max_torque: 2.0                    # per-axis [N m]
+max_tilt_deg: 34.4                 # ~= 0.6 rad
+
+# ES-EKF noise (continuous-time densities).
+ekf:
+  accel_noise: 0.02      # [m/s^2 / sqrt(Hz)]  (conservative vs test bench)
+  gyro_noise: 0.002      # [rad/s / sqrt(Hz)]
+  accel_bias_rw: 1.0e-4
+  gyro_bias_rw: 5.0e-6
+  init_pos_std: 0.05
+  init_vel_std: 0.05
+  init_att_std: 0.02
+  init_ba_std: 0.05
+  init_bg_std: 0.01
+
+# Simulation / sensing.
+sim:
+  imu_rate_hz: 500
+  vo_rate_hz: 30
+  vo_pos_std: 0.01
+  vo_att_std: 0.005
+  wind_base: [0.0, 0.0, 0.0]
+  wind_gust_amp: 1.0
+  wind_gust_freq: 0.5

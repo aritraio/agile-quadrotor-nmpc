@@ -1,0 +1,115 @@
+<!-- Realistic 6-DoF quadrotor MJCF model with visual + physical parity to the
+     standalone harness (mass 1 kg, J = diag(0.0123, 0.0123, 0.022), D = diag).
+     Pairs with simulation/mujoco_quadrotor_env/mujoco_native_bridge.{hpp,cpp};
+     falls back to quadrotor_env when MuJoCo is absent. -->
+<mujoco model="quadrotor_nmpc">
+  <compiler angle="radian" coordinate="local" inertiafromgeom="true"/>
+  <option gravity="0 0 -9.81" timestep="0.002" integrator="RK4"/>
+
+  <visual>
+    <headlight diffuse="0.6 0.6 0.6" ambient="0.3 0.3 0.3" specular="0 0 0"/>
+    <rgba haze="0.15 0.25 0.35 1"/>
+    <global azim="135" elevation="-20"/>
+  </visual>
+
+  <asset>
+    <texture type="skybox" builtin="gradient" rgb1="0.3 0.5 0.7" rgb2="0 0 0"
+             width="512" height="512"/>
+    <texture type="2d" name="ground_tex" builtin="checker" mark="edge"
+             rgb1="0.2 0.3 0.4" rgb2="0.1 0.15 0.2" width="512" height="512"/>
+    <material name="ground_mat" texture="ground_tex" texrepeat="8 8"
+              reflectance="0.2"/>
+    <material name="frame_mat" rgba="0.15 0.15 0.18 1" specular="0.6" shininess="0.4"/>
+    <material name="arm_mat" rgba="0.8 0.2 0.15 1" specular="0.5" shininess="0.3"/>
+    <material name="prop_mat" rgba="0.1 0.1 0.1 0.9" specular="0.2"/>
+    <material name="obs_mat" rgba="0.9 0.25 0.15 0.45" specular="0.1"/>
+    <material name="thrust_mat" rgba="0.3 0.8 1.0 0.5" emission="0.2"/>
+  </asset>
+
+  <worldbody>
+    <light diffuse="0.6 0.6 0.6" pos="0 0 6" dir="0 0 -1"/>
+    <geom name="ground" type="plane" size="20 20 0.1" material="ground_mat"/>
+    <!-- Ellipsoidal obstacle matching nmpc_tuning.yaml (center + radii). -->
+    <body name="obstacle" pos="3.0 0.0 1.5">
+      <freejoint/>
+      <geom name="obstacle_geom" type="ellipsoid" size="0.8 0.8 1.2"
+            material="obs_mat" contype="0" conaffinity="0"/>
+      <site name="obstacle_center" pos="0 0 0" size="0.02"/>
+    </body>
+
+    <!-- Quadrotor airframe: free root + X4 arms, motors, props, thrust sites. -->
+    <body name="quadrotor" pos="0 0 1.5">
+      <freejoint name="root"/>
+      <!-- Central frame -->
+      <geom name="frame" type="box" size="0.12 0.12 0.03" mass="0.6"
+            material="frame_mat"/>
+      <geom name="fc_stack" type="cylinder" size="0.04 0.03" pos="0 0 0.045"
+            mass="0.1" material="frame_mat"/>
+      <!-- Arms (X configuration, 45 deg), motors, propellers -->
+      <body name="arm_fl" pos="0.14 0.14 0">
+        <geom name="arm_fl_geom" type="box" size="0.11 0.025 0.012" mass="0.05"
+              quat="0.9239 0 0 0.3827" material="arm_mat"/>
+        <body name="motor_fl" pos="0.19 0.19 0.01">
+          <geom name="motor_fl_geom" type="cylinder" size="0.014 0.02" mass="0.03"
+                material="frame_mat"/>
+          <joint name="rotor_fl" type="hinge" axis="0 0 1" damping="0.0001"/>
+          <geom name="prop_fl" type="box" size="0.11 0.012 0.003" mass="0.01"
+                material="prop_mat"/>
+          <site name="thrust_fl" pos="0 0 0.01" size="0.015"/>
+        </body>
+      </body>
+      <body name="arm_fr" pos="0.14 -0.14 0">
+        <geom name="arm_fr_geom" type="box" size="0.11 0.025 0.012" mass="0.05"
+              quat="0.9239 0 0 -0.3827" material="arm_mat"/>
+        <body name="motor_fr" pos="0.19 -0.19 0.01">
+          <geom name="motor_fr_geom" type="cylinder" size="0.014 0.02" mass="0.03"
+                material="frame_mat"/>
+          <joint name="rotor_fr" type="hinge" axis="0 0 1" damping="0.0001"/>
+          <geom name="prop_fr" type="box" size="0.11 0.012 0.003" mass="0.01"
+                material="prop_mat"/>
+          <site name="thrust_fr" pos="0 0 0.01" size="0.015"/>
+        </body>
+      </body>
+      <body name="arm_rl" pos="-0.14 0.14 0">
+        <geom name="arm_rl_geom" type="box" size="0.11 0.025 0.012" mass="0.05"
+              quat="0.9239 0 0 0.3827" material="arm_mat"/>
+        <body name="motor_rl" pos="-0.19 0.19 0.01">
+          <geom name="motor_rl_geom" type="cylinder" size="0.014 0.02" mass="0.03"
+                material="frame_mat"/>
+          <joint name="rotor_rl" type="hinge" axis="0 0 1" damping="0.0001"/>
+          <geom name="prop_rl" type="box" size="0.11 0.012 0.003" mass="0.01"
+                material="prop_mat"/>
+          <site name="thrust_rl" pos="0 0 0.01" size="0.015"/>
+        </body>
+      </body>
+      <body name="arm_rr" pos="-0.14 -0.14 0">
+        <geom name="arm_rr_geom" type="box" size="0.11 0.025 0.012" mass="0.05"
+              quat="0.9239 0 0 -0.3827" material="arm_mat"/>
+        <body name="motor_rr" pos="-0.19 -0.19 0.01">
+          <geom name="motor_rr_geom" type="cylinder" size="0.014 0.02" mass="0.03"
+                material="frame_mat"/>
+          <joint name="rotor_rr" type="hinge" axis="0 0 1" damping="0.0001"/>
+          <geom name="prop_rr" type="box" size="0.11 0.012 0.003" mass="0.01"
+                material="prop_mat"/>
+          <site name="thrust_rr" pos="0 0 0.01" size="0.015"/>
+        </body>
+      </body>
+      <!-- Body-frame IMU + thrust visualization sites -->
+      <site name="imu" pos="0 0 0.02" size="0.01"/>
+      <site name="thrust_total" pos="0 0 0.05" size="0.02"/>
+    </body>
+  </worldbody>
+
+  <!-- 4 rotor thrust actuators (mapped from [fT, taux, tauy, tauz] by the
+       bridge allocation matrix) + obstacle marker. -->
+  <actuator>
+    <motor name="thrust_fl_m" joint="rotor_fl" gear="1" ctrlrange="0 6"/>
+    <motor name="thrust_fr_m" joint="rotor_fr" gear="1" ctrlrange="0 6"/>
+    <motor name="thrust_rl_m" joint="rotor_rl" gear="1" ctrlrange="0 6"/>
+    <motor name="thrust_rr_m" joint="rotor_rr" gear="1" ctrlrange="0 6"/>
+  </actuator>
+
+  <keyframe>
+    <key name="hover" qpos="0 0 1.5 1 0 0 0  0 0 0 0" qvel="0 0 0 0 0 0 0 0 0 0 0"/>
+  </keyframe>
+</mujoco>
