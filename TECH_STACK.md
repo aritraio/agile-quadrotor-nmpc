@@ -72,8 +72,9 @@
   5. `test_casadi_backend`: Cross-validation between native iLQR rollout and CasADi C-generated dynamics.
 
 ### 5.2. Compiler Hardening Flags
-All targets are built with strict compiler warnings enabled to guarantee aerospace-grade code safety:
+All targets are built with strict compiler warnings enabled to guarantee aerospace-grade code safety across GCC and Clang:
 ```cmake
--O3 -march=native -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion -Wimplicit-int-float-conversion
+-O3 -march=native -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion
+# Additional Clang/AppleClang checks: -Wimplicit-int-float-conversion
 ```
 The codebase compiles cleanly with **0 warnings**.

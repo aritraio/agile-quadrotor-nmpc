@@ -70,7 +70,8 @@ enable_testing()
 add_library(quadrotor_options INTERFACE)
 target_compile_features(quadrotor_options INTERFACE cxx_std_20)
 target_compile_options(quadrotor_options INTERFACE
-  $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-O3;-march=native;-Wall;-Wextra;-Wpedantic;-Wshadow;-Wconversion;-Wsign-conversion;-Wimplicit-int-float-conversion>
+  $<$<CXX_COMPILER_ID:Clang,AppleClang,GNU>:-O3;-march=native;-Wall;-Wextra;-Wpedantic;-Wshadow;-Wconversion;-Wsign-conversion>
+  $<$<CXX_COMPILER_ID:Clang,AppleClang>:-Wimplicit-int-float-conversion>
   $<$<CXX_COMPILER_ID:MSVC>:/O2;/W4>
 )
 # NOTE: -mavx2 from the README is x86-only; -march=native already enables the
@@ -80,7 +81,8 @@ target_link_libraries(quadrotor_options INTERFACE Eigen3::Eigen)
 # Strict C warnings for the CasADi-exported pure C99 sources.
 add_library(quadrotor_c_options INTERFACE)
 target_compile_options(quadrotor_c_options INTERFACE
-  $<$<COMPILE_LANGUAGE:C>:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wconversion;-Wsign-conversion;-Wimplicit-int-float-conversion>
+  $<$<COMPILE_LANGUAGE:C>:-Wall;-Wextra;-Wpedantic;-Wshadow;-Wconversion;-Wsign-conversion>
+  $<$<AND:$<COMPILE_LANGUAGE:C>,$<C_COMPILER_ID:Clang,AppleClang>>:-Wimplicit-int-float-conversion>
 )
 
 # ---------------------------------------------------------------------------
