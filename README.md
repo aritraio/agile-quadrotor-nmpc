@@ -10,6 +10,18 @@ An autonomous aerial robotics stack consisting of a 6-DoF trajectory optimizatio
 
 ---
 
+## 📚 Project Documentation Suite
+
+Comprehensive technical, operational, and interview documentation is available in the repository:
+
+* **[EXPLANATION.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/EXPLANATION.md)** — **Interview Master Guide**: First-principles mathematical derivations, Riccati recursion, Joseph-form covariance proofs, Top 20 interview Q&As, and whiteboard walkthrough scripts.
+* **[ARCHITECTURE.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/ARCHITECTURE.md)** — **System Architecture**: High-level topology, coordinate frames ($SO(3)$), full vs error state vectors, component deep dives, and zero-heap memory layouts.
+* **[WORKFLOW.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/WORKFLOW.md)** — **Operational Workflow**: Clean builds, running automated CTest suites, closed-loop flight simulation commands, log verification, and CI pipelines.
+* **[TECH_STACK.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/TECH_STACK.md)** — **Technical Stack & Toolchain**: C++20 standard requirements, Eigen 3 SIMD vectorization, CasADi/acados backends, MuJoCo physics, and compiler hardening flags.
+* **[INTERVIEW_PREP.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/INTERVIEW_PREP.md)** — **Interview Quick Reference**: Elevator pitches, metric scorecards, and high-yield question summaries.
+
+---
+
 ## Target Industry & Value Proposition
 * **Target Industries:** Autonomous Drones, Aerospace, Defense, Robotics (e.g., Skydio, Anduril, Joby Aviation, DJI, Shield AI).
 * **Resume Impact:** Demonstrates modern C++ proficiency, Lie algebra/quaternion kinematics, real-time numerical optimization, and multi-rate sensor fusion under hard execution deadlines.
