@@ -10,15 +10,16 @@ An autonomous aerial robotics stack consisting of a 6-DoF trajectory optimizatio
 
 ---
 
-## 📚 Project Documentation Suite
+## 📚 Technical Documentation Suite
 
-Comprehensive technical, operational, and interview documentation is available in the repository:
+For exhaustive technical deep-dives, mathematical proofs, and interview preparation, refer to the dedicated documentation files:
 
-* **[EXPLANATION.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/EXPLANATION.md)** — **Interview Master Guide**: First-principles mathematical derivations, Riccati recursion, Joseph-form covariance proofs, Top 20 interview Q&As, and whiteboard walkthrough scripts.
-* **[ARCHITECTURE.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/ARCHITECTURE.md)** — **System Architecture**: High-level topology, coordinate frames ($SO(3)$), full vs error state vectors, component deep dives, and zero-heap memory layouts.
-* **[WORKFLOW.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/WORKFLOW.md)** — **Operational Workflow**: Clean builds, running automated CTest suites, closed-loop flight simulation commands, log verification, and CI pipelines.
-* **[TECH_STACK.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/TECH_STACK.md)** — **Technical Stack & Toolchain**: C++20 standard requirements, Eigen 3 SIMD vectorization, CasADi/acados backends, MuJoCo physics, and compiler hardening flags.
-* **[INTERVIEW_PREP.md](file:///Users/aritra/Code/Languages/C++/01-quadrotor-nmpc-flight-control/INTERVIEW_PREP.md)** — **Interview Quick Reference**: Elevator pitches, metric scorecards, and high-yield question summaries.
+| Document | Description |
+|---|---|
+| 📖 **[Interview & Engineering Guide](docs/interview_guide.md)** | **Master Technical Interview Guide:** Complete end-to-end breakdown of quadrotor physics, Lie algebra $SO(3)$, 15-state ES-EKF derivations, Riccati recursion, Joseph-form covariance proofs, and **20+ Tier-1 robotics/aerospace interview questions with model answers**. |
+| 🏛️ **[System Architecture](docs/architecture.md)** | **System Architecture & Specifications:** High-level topology, coordinate frames ($SO(3)$), multi-rate timing budgets, full vs error state vectors, component deep dives, and zero-heap memory layouts. |
+| 🛠️ **[Developer Workflow](docs/workflow.md)** | **Operational & Build Workflow:** Clean builds, CTest automated test execution, closed-loop flight simulation commands, log verification, and CI pipelines. |
+| 💻 **[Technology Stack](docs/tech_stack.md)** | **Technical Stack & Tooling:** Detailed catalog of languages (C++20, C99, Python 3), Eigen 3 SIMD vectorization, CasADi/acados backends, MuJoCo physics, and compiler hardening flags. |
 
 ---
 
@@ -69,38 +70,125 @@ $$\min_{\mathbf{x}_{0:N}, \mathbf{u}_{0:N-1}} \sum_{k=0}^{N-1} \left( \|\mathbf{
 ```text
 quadrotor-nmpc/
 ├── CMakeLists.txt
+├── LICENSE
+├── README.md
 ├── config/
 │   ├── quadrotor_params.yaml
 │   └── nmpc_tuning.yaml
+├── docs/
+│   ├── architecture.md
+│   ├── interview_guide.md
+│   ├── tech_stack.md
+│   └── workflow.md
+├── generated/
+│   ├── ocp_description.json
+│   ├── quadrotor_cost.c
+│   ├── quadrotor_cost.h
+│   ├── quadrotor_dynamics_rk4.c
+│   └── quadrotor_dynamics_rk4.h
 ├── include/
+│   ├── controller/
+│   │   ├── casadi_nmpc_wrapper.hpp
+│   │   ├── nmpc_solver.hpp
+│   │   └── trajectory_generator.hpp
 │   ├── dynamics/
 │   │   ├── quadrotor_model.hpp
-│   │   └── rk4_integrator.hpp
-│   ├── estimation/
-│   │   ├── es_ekf.hpp
-│   │   └── sensor_types.hpp
-│   └── controller/
-│       ├── nmpc_solver.hpp
-│       └── trajectory_generator.hpp
+│   │   ├── rk4_integrator.hpp
+│   │   └── types.hpp
+│   └── estimation/
+│       ├── es_ekf.hpp
+│       └── sensor_types.hpp
+├── logs/
+│   └── .gitkeep
+├── scripts/
+│   └── export_ocp_casadi.py
+├── simulation/
+│   └── mujoco_quadrotor_env/
+│       ├── mujoco_native_bridge.cpp
+│       ├── mujoco_native_bridge.hpp
+│       ├── mujoco_visual_node.cpp
+│       ├── quadrotor_env.cpp
+│       ├── quadrotor_env.hpp
+│       └── quadrotor.xml
 ├── src/
-│   ├── dynamics/
-│   ├── estimation/
 │   ├── controller/
+│   │   ├── nmpc_solver.cpp
+│   │   └── trajectory_generator.cpp
+│   ├── dynamics/
+│   │   └── quadrotor_model.cpp
+│   ├── estimation/
+│   │   └── es_ekf.cpp
 │   └── main_node.cpp
-├── tests/
-│   ├── test_quaternion.cpp
-│   ├── test_integrator.cpp
-│   └── test_es_ekf.cpp
-└── simulation/
-    └── mujoco_quadrotor_env/
+└── tests/
+    ├── test_casadi_backend.cpp
+    ├── test_es_ekf.cpp
+    ├── test_integrator.cpp
+    ├── test_nmpc.cpp
+    └── test_quaternion.cpp
 ```
 
 ### Technical Stack
 * **Language:** Modern C++ (C++20, standard concepts, constexpr configuration).
-* **Solvers:** CasADi (symbolic auto-differentiation & C-code generation) or `acados` (Real-Time Iteration SQP solver with `qpOASES` / `HPIPM` backend).
-* **Linear Algebra:** Eigen 3 with SIMD vectorization enabled (`-O3 -march=native -mavx2`).
-* **Simulation:** MuJoCo C API or Isaac Sim / ROS 2 Humble.
-* **Memory Management:** Zero heap allocations during steady-state control cycles; static pre-allocated workspace buffers.
+* **Solvers:** Native Gauss-Newton iLQR with Riccati recursion, plus optional CasADi/acados Real-Time Iteration SQP backend.
+* **Linear Algebra:** Eigen 3 with SIMD vectorization enabled (`-O3 -march=native`).
+* **Simulation:** High-fidelity 6-DoF RK4 aerospace simulation + native MuJoCo MJCF C API bridge.
+* **Memory Management:** Zero heap allocations on the real-time hot path; statically allocated workspace buffers.
+
+---
+
+## 📊 Automated Verification & Benchmarks
+
+The project compiles cleanly under strict flags (`-Wall -Wextra -Wpedantic -Wconversion`) and passes 100% of automated tests across all 5 verification suites:
+
+```text
+Test project .../build
+    Start 1: test_quaternion
+1/5 Test #1: test_quaternion ..................   Passed    0.67 sec
+    Start 2: test_integrator
+2/5 Test #2: test_integrator ..................   Passed    0.49 sec
+    Start 3: test_es_ekf
+3/5 Test #3: test_es_ekf ......................   Passed    0.58 sec
+    Start 4: test_nmpc
+4/5 Test #4: test_nmpc ........................   Passed    0.52 sec
+    Start 5: test_casadi_backend
+5/5 Test #5: test_casadi_backend ..............   Passed    0.49 sec
+
+100% tests passed out of 5
+```
+
+---
+
+## 🚀 Quick Start Guide
+
+### 1. Build and Run Tests
+```bash
+# Clone the repository
+git clone https://github.com/aritraio/agile-quadrotor-nmpc.git
+cd agile-quadrotor-nmpc
+
+# Configure and compile with Release optimizations
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+# Execute the automated verification suite
+ctest --test-dir build --output-on-failure
+```
+
+### 2. Run Closed-Loop Flight Simulation
+```bash
+# Run 3D Lemniscate (Figure-8) trajectory flight simulation
+./build/main_node lemniscate 10.0 logs/flight_lemniscate.csv
+```
+
+### 3. Optional: CasADi Symbolic C-Code Generation
+```bash
+# Generate C99 dynamics and cost functions
+python3 scripts/export_ocp_casadi.py --outdir generated
+
+# Compile with acados/CasADi C backend enabled
+cmake -B build -S . -DCMAKE_BUILD_TYPE=Release -DUSE_ACADOS=ON
+cmake --build build -j
+```
 
 ---
 
@@ -132,3 +220,10 @@ quadrotor-nmpc/
 * *Architected a 100 Hz Non-Linear Model Predictive Controller (NMPC) in C++20 for full 6-DoF agile quadrotor flight, maintaining $<5\,\text{ms}$ SQP solve time per cycle.*
 * *Designed a 15-state Error-State Kalman Filter (ES-EKF) fusing 500 Hz IMU telemetry with 30 Hz Visual Odometry, estimating orientation error within 1.2 degrees.*
 * *Eliminated heap allocations across the real-time control loop by employing pre-allocated memory pools and Eigen SIMD vectorization.*
+
+---
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+

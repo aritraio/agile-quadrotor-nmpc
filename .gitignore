@@ -1,12 +1,28 @@
 # Build artifacts
 build/
+build_*/
 bin/
 lib/
 out/
+Testing/
 CMakeCache.txt
 CMakeFiles/
+CTestTestfile.cmake
 cmake_install.cmake
 compile_commands.json
+*.o
+*.a
+*.so
+*.dylib
+*.elf
+*.bin
+*.map
+
+# Test & coverage artifacts
+*.gcda
+*.gcno
+*.gcov
+
 
 # Caches & IDEs
 .cache/
